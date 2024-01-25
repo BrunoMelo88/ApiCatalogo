@@ -1,4 +1,5 @@
 ﻿using ApiCatalogo.Context;
+using ApiCatalogo.Filters;
 using ApiCatalogo.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -22,6 +23,7 @@ namespace ApiCatalogo.Controllers
 
         // GET: api/<ProdutosController>
         [HttpGet]
+        [ServiceFilter(typeof(ApiLoggingFilter))]
         public ActionResult<IEnumerable<Produto>> Get()
         {
             try
@@ -40,13 +42,32 @@ namespace ApiCatalogo.Controllers
 
         }
 
+        [HttpGet("primeiro")]
+        public ActionResult<Produto> GetPrimeiro()
+        {
+            try
+            {
+                var produto = _context.Produtos.FirstOrDefault();
+                if (produto is null)
+                {
+                    return NotFound($"Produto não encontrado...");
+                }
+                return produto;
+            }
+            catch (Exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, "Ocorreu um erro ao atratar sua solicitação.");
+            }
+
+        }
+
         // GET api/<ProdutosController>/5
-        [HttpGet("{id:int}", Name = "ObterProduto")]
+        [HttpGet("{id:int:min(1)}", Name = "ObterProduto")]
         public ActionResult<Produto> Get(int id)
         {
             try
             {
-                var produto = _context.Produtos.FirstOrDefault(p => p.ProdutoId == id);
+                var produto = _context.Produtos.AsNoTracking().FirstOrDefault(p => p.ProdutoId == id);
                 if (produto is null)
                 {
                     return NotFound($"Produto não encontrado...");

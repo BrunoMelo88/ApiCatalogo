@@ -12,15 +12,19 @@ namespace ApiCatalogo.Controllers
     public class CategoriasController : ControllerBase
     {
         private readonly AppDbContext _context;
+        private readonly ILogger _logger;
 
-        public CategoriasController(AppDbContext context)
+        public CategoriasController(AppDbContext context, ILogger<CategoriasController> logger)
         {
             _context = context;
+            _logger = logger;
         }
 
         [HttpGet("produtos")]
         public ActionResult<IEnumerable<Categoria>> GetCategoriasProdutos()
         {
+
+            _logger.LogInformation("======================= GET api/categorias =======================");
             return _context.Categorias.Include(p => p.Produtos).Take(10).ToList();
             //return _context.Categorias.Include(p => p.Produtos).Where(c=> c.CategoriaId <= 5).ToList();
         }

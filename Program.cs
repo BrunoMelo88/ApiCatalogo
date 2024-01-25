@@ -1,4 +1,7 @@
 using ApiCatalogo.Context;
+using ApiCatalogo.Filters;
+using ApiCatalogo.Logging;
+using APICatalogo.Extensions;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -16,10 +19,16 @@ var mySqlConnection = builder.Configuration.GetConnectionString("DefaultConnecti
 builder.Services.AddDbContext<AppDbContext>(options => options.UseMySql(mySqlConnection,
                                             ServerVersion.AutoDetect(mySqlConnection)));
 
+builder.Services.AddScoped<ApiLoggingFilter>();
 
+builder.Logging.AddProvider(new CustomLoggerProvider(new CustomLoggerProviderConfiguration
+{
+    LogLevel = LogLevel.Information
+}));
 
 var app = builder.Build();
 
+app.ConfigureExceptionHandler();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
